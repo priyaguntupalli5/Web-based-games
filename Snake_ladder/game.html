@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+			h1 {
+				text-align: center;
+				color:#BC8F8F;
+				font-weight: normal;
+				text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+			}
+			body {overflow: hidden;}
+			table, td {
+				margin-left: auto;
+				margin-right: auto;
+				border-collapse:collapse;
+				text-align: center;
+				font-weight: bold;
+			}
+			button {
+				text-align: center;
+				padding: 15px;
+				font-size: 20px;
+				cursor: pointer;
+				background: #E9967A;
+				color: white;
+				border: 0px;
+				width: 100%;
+			}
+			#player td{
+				font-size: 20px;
+				border: 1px solid black;
+				color: #C71585;
+			}
+			#player1, #player2 {
+				width: 10px;
+				height: 10px;
+			}
+			#player1 {background: blue;}
+			#player2 {background: yellow;}
+		</style>
+	</head>
+	<body onload="getPlayerName()">
+		<h1 style="text-align: center"> Snake and Ladder </h1>
+		<p id="demo"></p>
+		<p id="ls"></p>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>		
+		<script src="jquery.line.js"></script>
+		<script>
+		
+		//designing board 10*10
+			var table = "<table border='2'>";
+			for(var row=1,val=100;row<=10;row++)
+			{
+				table += "<tr class='row'>";
+				if(row%2 != 0)
+				{
+					for(var col=1;col<=10;col++,val--)
+					{
+						if(val %2 == 0)
+							table += "<td id='cell"+val+"'style='padding:15px;background-color:#D2B48C'>"+val+"</td>";
+						else
+							table += "<td id='cell"+val+"'style='padding:15px;background-color:#708090'>"+val+"</td>";
+					}
+				}
+				else
+				{
+				//even rows should assign in reverse order
+					var even_row = [];
+					for(var col=1;col<=10;col++,val--)
+						even_row.push(val);
+					for(var col=10;col>0;col--)
+					{
+						if(even_row[col-1] %2 == 0)
+							table += "<td id='cell"+even_row[col-1]+"'style='padding:15px;background-color:#D2B48C'>" + even_row[col-1] +"</td>";
+						else
+							table += "<td id='cell"+even_row[col-1]+"'style='padding:15px;background-color:#708090'>" + even_row[col-1] +"</td>";
+					}
+				}
+				table += "</tr>";
+			}
+			
+			//dice row
+			table += "<tr id='player'> <td id='p1' colspan='4' style='background-image:radial-gradient(white, gray)'>Player 1</td> <td colspan='2'>";
+			table += "<button id='dice' onclick='diceRoll()'><b>0</b></button></td>";
+			table += "<td colspan='4' id='p2' style='background:#FFF8DC'>Player 2</td></tr></table>";
+			document.getElementById("demo").innerHTML += table;
+			
+			//align ladders
+			var ladders = {2:18,9:28,25:47,30:50,39:41,45:57,51:73,65:85,79:98,89:91};
+			var ladder_keys = [2,9,25,30,39,45,51,65,79,89];
+			var x1, y1, x2, y2, flagS = 0, flagL = 0;
+			for(var key in ladders)
+			{
+				getCoordinates(key,ladders[key]);
+				drawLadder(x1,y1,x2,y2);
+			}
+				
+			//align snakes	
+			var snakes = {27:5,38:17,52:33,66:46,97:58,62:60,93:67,90:70,95:75,99:81};
+			var snake_keys = [27,38,52,66,97,62,93,90,95,99];
+			for(var key in snakes)
+			{
+				getCoordinates(key,snakes[key]);
+				drawSnake(x1,y1,x2,y2);
+			}
+			
+			//draw players
+			var player1 = 1, player2 = 1, player1_turn = 'Y', player2_turn = 'N',player1_draw = 'Y', player2_draw = 'Y';
+			var player1_name, player2_name;
+			drawPlayers();
+			
+			//get coordinates of snakes and ladders
+			function getCoordinates(cell1,cell2)
+			{
+				x1 = $('#cell'+cell1).offset().left+$('#cell'+cell1).height();
+				y1 = $('#cell'+cell1).offset().top+$('#cell'+cell1).width();
+				x2 = $('#cell'+cell2).offset().left+$('#cell'+cell2).height();
+				y2 = $('#cell'+cell2).offset().top+$('#cell'+cell2).width();
+			}
+			
+			//drawing ladders using its coordinates
+			function drawLadder(x1,y1,x2,y2)
+			{
+				$('#demo').line(x1,y1,x2,y2, {
+					zindex : 10000,
+					color  : 'green',
+					stroke : "2",
+					style  : "solid",
+					class  : "line"
+				});	
+			}
+			
+			//drawing snakes using its coordinates
+			function drawSnake(x1,y1,x2,y2)
+			{
+				$("#demo").line(x1,y1,x2,y2, {
+					zindex : 10000,
+					color  : 'red',
+					stroke : "2",
+					style  : "solid",
+					class  : "line"
+				});
+			}
+			
+			//rolling dice
+			function diceRoll()
+			{
+				var dice_value = Math.floor(Math.random()*6)+1;
+				document.getElementById("dice").innerHTML = dice_value;
+				if(player1_turn == 'Y')
+				{
+					player2_draw = 'N';
+					player1_draw = 'Y';
+					if(player1 + dice_value <= 100)
+					{
+						$("#player1").remove();
+						player1 += dice_value;
+						if(dice_value != 6)
+						{
+							player2_turn = 'Y';
+							player1_turn = 'N';
+						}
+						else
+						{
+							player1_turn = 'Y';
+							player2_turn = 'N';
+						}
+					}
+					else 
+					{
+						player1_draw = 'N';
+						player2_turn = 'Y';
+						player1_turn = 'N';
+					}
+				}
+				else
+				{
+					player1_draw = 'N';
+					player2_draw = 'Y';
+					if(player2 + dice_value <= 100)
+					{
+						$("#player2").remove();
+						player2 += dice_value;
+						if(dice_value != 6)
+						{
+							player2_turn = 'N';
+							player1_turn = 'Y';
+						}
+						else
+						{
+							player2_turn = 'Y';
+							player1_turn = 'N';
+						}
+					}
+					else 
+					{
+						player2_draw = 'N';
+						player2_turn = 'N';
+						player1_turn = 'Y';
+					}
+				}
+				drawPlayers();
+				var player1_index = ladder_keys.indexOf(player1);
+				if(player1_index != -1)
+				{
+					$("#player1").remove();
+					player1 = ladders[player1];
+					drawPlayers();
+					player1_turn = 'Y';
+					player2_turn = 'N';
+					player1_draw = 'Y';
+					player2_draw = 'N';
+				}
+				else
+	            {
+					player1_index = snake_keys.indexOf(player1);
+					if(player1_index != -1)
+					{
+						$("#player1").remove();
+						player1 = snakes[player1];
+						drawPlayers();
+						player2_draw = 'N';
+						player1_draw = 'Y';
+					}
+				}
+				var player2_index = ladder_keys.indexOf(player2);
+				if(player2_index != -1)
+				{
+					$("#player2").remove();
+					player2 = ladders[player2];
+					drawPlayers();
+					player2_turn = 'Y';
+					player1_turn = 'N';
+					player2_draw = 'Y';
+					player1_draw = 'N';
+				}
+				else
+	            {
+					player2_index = snake_keys.indexOf(player2);
+					if(player2_index != -1)
+					{
+						$("#player2").remove();
+						player2 = snakes[player2];
+						drawPlayers();
+						player2_draw = 'Y';
+						player1_draw = 'N';
+					}
+				}
+				
+				if(player1 == 1)
+					playerWon(player1_name);
+				else if(player2 == 100)
+					playerWon(player2_name);
+			}
+			
+			//draw players based on dice value
+			function drawPlayers()
+			{
+				if(player1_draw == 'Y')
+					$("#cell"+player1).append("<div id='player1' style='float:left'></div>");
+				if(player2_draw == 'Y')
+					$("#cell"+player2).append("<div id='player2' style='float:right'></div>");
+				//highlight the player to play
+				if(player1_turn == 'Y')
+				{
+					$("#p1").css("background-image","radial-gradient(white, gray)");
+					$("#p1").css("box-shadow","5px 2px #888888");
+					$("#p2").css("box-shadow","0px 0px");
+					$("#p2").css('background','#FFF8DC');
+				}
+				else
+				{
+					$("#p2").css("background-image","radial-gradient(white, gray)");
+					$("#p2").css("box-shadow","5px 2px #888888");
+					$("#p1").css("box-shadow","0px 0px");
+					$("#p1").css('background','#FFF8DC');
+				}
+			}
+			
+			//retrieve player names
+			function getPlayerName()
+			{
+				player1_name = prompt("Player1 name:");
+				player2_name = prompt("Player2 name:");	
+				if(player1_name == "" || player1_name == null)
+					player1_name = "Player 1";
+				if(player2_name == "" || player2_name == null)
+					player2_name = "Player 2";
+				$("#p1").text(player1_name);
+				$("#p2").text(player2_name);
+			}
+			
+			//win page
+			function playerWon(name)
+			{
+				var won = "<img src='won.gif' style='width:50%;display:block;margin-left:auto;margin-right: auto'>";
+				won += "<div id='won' style='width:100%;font-size:100px;text-align:center;color:yellow;font-weight:bold'>"+name+"</div>";;
+				//document.getElementById('won').style.textShadow("-1px 1px 0 #000,1px 1px 0 #000,1px -1px 0 #000,-1px -1px 0 #000");
+				document.write(won);
+			}
+		</script>
+	</body>
+</html>
