@@ -1,0 +1,109 @@
+<html>
+	<head>
+		<style>
+			img {
+				width:100px;
+				height:100px;
+				}
+			table {border:none;}
+			
+			}
+			body{ margin:0;}
+		</style>
+	</head>
+	<body>
+		<p id="demo"></p>		
+		<p id="score"></p>
+		<script>
+			var images=["tomato.jpg","gapple.jpg","pineapple.jpg","mango.jpg","peach.jpg","grape.jpg"];
+			var count=[0,0,0,0,0,0],i,flip_close=0,past_index=-1;
+			var result=0,score=0;
+			var table,c=0,store_images=[],index_of_stored_images=0;
+			store_images.length=36;
+			table='<table border="1">';
+			for(var row=0;row<6;row++)
+			{
+				table+='<tr>';
+				for(var col=0;col<6;col++) 
+					table+='<td><img class="cells" onload="random(this)" onclick="click_flip(this)" src="flip_back.jpeg"></td>';
+				table+='</tr>';
+			}
+			table+='</table>';	
+			document.getElementById("demo").innerHTML=table;
+			function random(ob)
+			{
+				if(ob.src.indexOf("flip_back.jpeg") != -1)
+					i=Math.floor(Math.random()*6);
+				count[i]++;
+				if(count[i]<7) {
+					ob.src=images[i];
+					var cell_index=ob.parentElement.cellIndex;
+					var row_index=ob.parentElement.parentElement.rowIndex;
+					var index=row_index*6+cell_index;
+					store_images[index]=ob.src;
+					}
+				else
+					random(ob);
+				c++;
+				if(c==36) 
+					setTimeout(backToFlip,10000);	
+			}
+			function backToFlip()
+			{
+				var x=document.getElementsByClassName("cells");
+				for(var i=0;i<x.length;i++)
+					x[i].src="flip_back.jpeg";
+			}
+			function click_flip(ob)
+			{
+			if(ob.src.indexOf("flip_back.jpeg")!=-1) {
+				var index;
+				var cell_index=ob.parentElement.cellIndex;
+				var row_index=ob.parentElement.parentElement.rowIndex;
+				index=row_index*6+cell_index;
+				flip_close++;
+				var copy;
+				ob.src=store_images[index];
+				if(flip_close==2)
+				{
+					if(store_images[past_index]!=store_images[index]) {
+						copy=past_index;
+						setTimeout(function() {flipCellBack(copy,index)},500);
+						}
+					else {
+						score+=5;
+						if(score==90)
+						  won();
+						document.getElementById("score").innerHTML="Your score is: "+score;
+						}
+					flip_close=0;
+				}
+				
+				past_index=index;
+				}
+				}
+			function flipCellBack(past_index,index)
+			{
+				var x=document.getElementsByClassName("cells");
+				x[past_index].src="flip_back.jpeg";
+				x[index].src="flip_back.jpeg";
+			}
+		var game_over=setTimeout(lost,120000);
+		function lost() {
+		var count=0;
+		var x=document.getElementsByClassName("cells");
+		for(var i=0;i<36;i++)
+			if(x[i].src.indexOf("flip_back.jpeg") != -1)
+				count++;
+		var loose='<p style="font-size:50px;text-align:center;color:red">You are left with '+ count+' items</p>';
+		loose+='<p style="font-size:50px;text-align:center;color:red">TIME UP!!</p>';
+		document.write(loose+'<img src="cry.gif" style="display:block; margin-left:auto; margin-right:auto">');
+		 }
+		function won() {
+			//var body=document.getElementsByTagName("body");
+			//document.body.style.backgroundColor='yellow';
+			document.write("<p style='font-size:50px;text-align:center;color:red '>YOU WON</p><img src='balloons.gif' style='display:block; margin-left:auto; margin-right:auto'><body style='background-color:cyan'>");
+			}
+		</script>
+	</body>
+</html>
