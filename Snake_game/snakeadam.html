@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+border: 5px solid grey;
+height: 412px;
+width: 750px;
+background-color: lightgrey;
+}
+h1 {
+ color: red;
+ font-size: 50px;
+ }
+ button {
+ background: url("sounds.png") no-repeat;
+ border-radius: 100%;
+ border: 2px solid grey;
+ width: 128px;
+ height: 128px;
+ position: absolute;
+ left: 870px;
+ top: 10px;
+ cursor: pointer;
+ outline: none;
+ } 
+</style>
+</head>
+<body>
+<canvas id="canvas" width="750" height="412">
+</canvas>
+<button id="mute" onclick="Mute()"></button>
+<p id = "demo"></p>
+<script>
+var snakesound = new Audio();
+snakesound.src = "snake.mp3";
+var sound = new Audio();
+sound.src ="snakesound.mp3";
+var frogsound = new Audio();
+frogsound.src = "snakeeats.mp3";
+var mute = document.getElementById("mute");
+function initCanvas() {
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+var cx = canvas.width;
+var cy = canvas.height;
+var k,a,t,c=0;
+var score = 0;
+var ranx = Math.floor(Math.random()*740);
+var rany = Math.floor(Math.random()*400);
+var image = new Image();
+image.src = "snakebg.png";
+var flag = 0,flag1=0;
+ctx.fillRect(200,0,cx,cy);
+var snakes = [];
+var frogs = [];
+var snake = new Snake();
+var frog = new Frog();
+var updatefrog = new FROG();
+snakes[2] = 10;
+snakes[3] = 50;
+function Snake() {
+   this.x=0, this.y = 0,this.w = 10,this.h = 50;
+   this.render = function() {
+   if(this.x<0||this.y<0||this.x>(cx-snakes[2])||this.y>(cy-snakes[3])) {
+   ctx.fillStyle = "red";
+   ctx.font = "60px Arial";
+   sound.play();
+   ctx.fillText("GAME OVER",cx*0.5-150,cy*0.5,500);
+   ctx.strokeText("GAME OVER",cx*0.5-150,cy*0.5,500);
+   clearInterval(animate);
+   clearInterval(t);
+   flag1 = 1;
+   }
+   if(flag1!=1) {
+   t = setTimeout(timer,120000);
+   function timer() {
+   ctx.fillStyle = "red";
+   ctx.font = "60px Arial";
+   c++;
+   if(c==1) 
+   sound.play();
+   ctx.fillText("YOUR TIME IS UP!!",cx*0.5-200,cy*0.5,500);
+   ctx.strokeText("YOUR TIME IS UP!!",cx*0.5-200,cy*0.5,500);
+   clearInterval(animate);
+   clearInterval(t);
+   }
+   }
+   ctx.fillStyle = "white";
+   if(flag!=2) {
+  snakesound.play();
+   ctx.fillRect(this.x, this.y, this.w, this.h);
+   snakes[0] = this.x;
+   snakes[1] = this.y;
+   snakes[2] = this.w;
+   snakes[3] = this.h;
+  }
+  else {
+ snakesound.play();
+  ctx.fillRect(this.x,this.y,snakes[2],snakes[3]);
+  snakes[0] = this.x;
+   snakes[1] = this.y;
+  }
+  }
+  }
+function Frog() {
+  this.x = ranx, this.y = rany,this.w = 10, this.h = 10;
+  this.render = function() {
+   ctx.fillStyle = "white";
+   if(flag==2) {
+   this.w = snakes[2];
+   this.h = snakes[3];
+   }
+   ctx.fillRect(this.x, this.y, this.w, this.h);
+   frogs[0] = this.x;
+   frogs[1] = this.y;
+   frogs[2] = this.w;
+   frogs[3] = this.h;
+  }
+  }
+  function FROG() {
+ this.render = function() {
+  this.x = frogs[0], this.y = frogs[1],this.w = 10,this.h = 10;
+   ctx.fillStyle = "white";
+   ctx.fillRect(this.x, this.y, this.w, this.h);
+   frogs[0] = this.x;
+   frogs[1] = this.y;
+   frogs[2] = this.w;
+   frogs[3] = this.h;
+  }
+  }
+  function frogupdate() {
+  ctx.clearRect(frogs[0], frogs[1], frogs[2],frogs[3]);
+  frogs[0] = Math.floor(Math.random()*740);
+  frogs[1] = Math.floor(Math.random()*400);
+  flag = 2;
+  }
+  function snakeupdate() {
+   if(k==37) 
+   snakes[2]+=5;
+   else if(k==38)
+   snakes[3]+=5;
+   else if(k==39) 
+   snakes[2]+=5;
+   else if(k==40) 
+   snakes[3]+=5;
+   }
+  function hit() {
+  if(snakes[0]+snakes[2]>=frogs[0]&&snakes[0]<=frogs[0]+frogs[2]&&snakes[1]+snakes[3]>=frogs[1]&&snakes[1]<=frogs[1]+frogs[3]) {
+   frogsound.play();
+  flag = 1;
+  score=score+5;
+  }
+  }
+function animate() {
+  ctx.fillRect(0,0,cx,cy);
+  ctx.drawImage(image,0,0);
+  if(flag==0) {
+  frog.render();
+  snake.render();
+  }
+  if(flag==1) {
+  frogupdate();
+  snakeupdate();
+  }
+  if(flag==2) {
+  updatefrog.render();
+  snake.render();
+ }
+  }
+var animate = setInterval(animate,30);
+document.addEventListener('keydown',function(event) {
+      k = event.keyCode;
+      if(k==38) {
+      snake.y-=5;
+       snake.w = 10;
+	  snake.h = 50;
+	  if(flag!=0&&snakes[2]>snakes[3]){
+	  a=snakes[2];
+	  snakes[2]=snakes[3];
+	  snakes[3]=a;
+	  }
+	  }
+      else if(k==40) {
+      snake.y+=5;
+	  snake.w = 10;
+	  snake.h = 50;
+	  if(flag!=0&&snakes[2]>snakes[3]){
+	  a=snakes[2];
+	  snakes[2]=snakes[3];
+	  snakes[3]=a;
+	  }
+	  }
+      else if(k==39) {
+      snake.x+=5;
+	  snake.w = 50;
+	  snake.h = 10;
+	  if(flag!=0&&snakes[3]>snakes[2]){
+	  a=snakes[2];
+	  snakes[2]=snakes[3];
+	  snakes[3]=a;
+	  }
+	  }
+      else if(k==37) {
+      snake.x-=5;
+	  snake.w = 50;
+	  snake.h = 10;
+	  if(flag!=0&&snakes[3]>snakes[2]){
+	  a=snakes[2];
+	  snakes[2]=snakes[3];
+	  snakes[3]=a;
+	  }
+	  }
+     });
+	window.addEventListener('keydown',function(event) {
+	 document.getElementById("status").innerHTML = "Your score is "+score;
+	 hit();
+	});
+}
+	 function Mute() {
+   if(snakesound.muted||frogsound.muted||sound.muted) {
+    snakesound.muted = false;
+	frogsound.muted =false;
+	sound.muted = false;
+	mute.style.background = "url(sounds.png) no-repeat";
+	 }
+	 else {
+	 snakesound.muted = true;
+	 sound.muted = true;
+	 frogsound.muted = true;
+	mute.style.background = "url(Mute.png) no-repeat";
+	 }
+	 }
+window.addEventListener('load',function(event) {
+   initCanvas();
+});
+</script>
+<h1 id = "status"></h1>
+<h3>Please remember!! You have only 2 minutes time to play!!</h3>
+</body>
+</html>
