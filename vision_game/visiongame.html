@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<body>
+<canvas id = "canvas" width = "1348" height = "645"></canvas>
+<script>
+var player,cx,cy,flag=0,ctx,y=-150,h,w,hit=0,score=0,canvas,paths,T,ch;
+var x1,x2,prevpaths,prevx1,prevx2;
+var design = new Image();
+design.src = "design.jpg";
+var designs = new Image();
+designs.src = "designs.jpg";
+var die = new Audio();
+die.src = "dying.mp3";
+function initCanvas() {
+ canvas = document.getElementById("canvas");
+ player = new Player();
+ ctx = canvas.getContext("2d");
+    cx = canvas.width;
+    cy = canvas.height;
+      ctx.fillStyle = "black";
+	  ctx.fillRect((cx*0.5)-75,cy-150,150,150);
+	  ctx.fillRect(0,0,10,cy);
+	  ctx.fillRect(cx-10,0,10,cy);
+	  player.x=(cx*0.5)-75;
+  function Player() {
+    this.x = (cx*0.5)-75,this.y = 495;
+	 this.render = function() {
+	 flag++;
+	    ctx.fillStyle = "black";
+	    ctx.fillRect(this.x,this.y,150,150);
+	 }
+	 }
+  function comp(x) {
+    if(y<cy*0.5) {
+     ctx.fillStyle = "black";
+	 ctx.fillRect(x,y,150,150);
+	  ctx.clearRect(x,y-150,150,150);
+	  y+=5;
+	  }
+	 if(y>=cy*0.5) {
+	  h=y;
+	  y=-150;
+	  flag=0;
+	  prevpaths = paths;
+	  prevx1=x1;
+	  prevx2=x2;
+	 }
+	 if(h>=cy*0.5) {
+	 hit();
+	 if(prevpaths==2&&h!=0) {
+	 comp1(prevx1);
+	 comp1(prevx2);
+	 }
+	 else if(prevpaths==1&&h!=0)
+	 comp1(prevx1);
+	 }
+	 }
+	 function comp1(w){
+	 ctx.fillStyle = "black";
+	 ctx.fillRect(w,h,150,150);
+	 ctx.clearRect(w,h-150,150,150);
+	if(prevpaths==2)
+	  h+=3;
+	  else
+	  h+=5;
+	 if(h>=cy+10) {
+	 ctx.clearRect(w,h,150,150);
+	 h=0;
+	 }
+	 }
+	 T = setTimeout(timer,120000);
+	 function timer() {
+	   die.play();
+	    ctx.fillStyle = "red";
+        ctx.font = "60px Arial";
+         ctx.fillText("YOUR TIME IS UP!!",cx*0.5-300,cy*0.5,500);
+         ctx.strokeText("YOUR TIME IS UP!!",cx*0.5-300,cy*0.5,500);
+		 ctx.fillStyle = "red";
+		  ctx.font = "60px Arial";
+		ctx.fillText(score,cx*0.5-200,cy*0.3,500);
+        ctx.strokeText(score,cx*0.5-200,cy*0.3,500);
+         clearInterval(animate);
+      }
+	 function hit() {
+	 if(prevpaths==1) {
+	   if(player.x+150>=prevx1&&player.x<=prevx1+150&&player.y+150>=h&&player.y<=h+150) {
+	   die.play();
+	   // alert("Your score is "+score);
+		ctx.fillStyle = "red";
+        ctx.font = "60px Arial";
+		ctx.fillText(score,cx*0.5-200,cy*0.5,500);
+        ctx.strokeText(score,cx*0.5-200,cy*0.5,500);
+		ctx.fillStyle = "red";
+        ctx.font = "60px Arial";
+		ctx.fillText("GAME OVER",cx*0.5-200,cy*0.3,500);
+        ctx.strokeText("GAME OVER",cx*0.5-200,cy*0.3,500);
+	   clearInterval(animate);
+	   }
+	   }
+	   else {
+	   if((player.x+150>=prevx1&&player.x<=prevx1+150&&player.y+150>=h&&player.y<=h+150)||(player.x+150>=prevx2&&player.x<=prevx2+150&&player.y+150>=h&&player.y<=h+150)) {
+       die.play();
+	  // alert("Your score is "+score);
+	  ctx.fillStyle = "red";
+        ctx.font = "60px Arial";
+		ctx.fillText("GAME OVER",cx*0.5-200,cy*0.3,500);
+        ctx.strokeText("GAME OVER",cx*0.5-200,cy*0.3,500);
+		ctx.fillStyle = "red";
+        ctx.font = "60px Arial";
+		ctx.fillText(score,cx*0.5-200,cy*0.5,500);
+        ctx.strokeText(score,cx*0.5-200,cy*0.5,500);
+	   clearInterval(animate);
+	   }
+	   }
+	   }
+  function path() {
+  if(flag==1) {
+    paths = Math.ceil(Math.random()*2);
+	ch = Math.ceil(Math.random()*3);
+	score+=100;
+	}
+	if(paths==2) {
+	if(ch==1) {
+	x1=599;
+	x2=1178;
+	comp(x1);
+	comp(x2);
+	}
+	else if(ch==2) {
+	x1=20;
+	x2=1178;
+	comp(x1);
+	comp(x2);
+	}
+	else {
+	x1=20;
+	x2=599;
+	comp(x1);
+	comp(x2);
+	}
+	}
+	else {
+	 if(ch==1) {
+	 x1=20;
+	 comp(x1);
+	 }
+	 else if(ch==2) {
+	 x1=599;
+	 comp(x1);
+	 }
+	 else {
+	 x1=1178; 
+	 comp(x1);
+	 }
+	}
+	}
+	
+	 function animate() {
+	 ctx.drawImage(design,270,0);
+	 ctx.drawImage(design,800,0);
+	 ctx.drawImage(designs,270,cy-400);
+	  ctx.drawImage(designs,800,cy-400);
+	  player.render();
+	  path();
+	  }
+	 var animate = setInterval(animate,30);
+	  }
+	 // document.getElementById("status").innerHTML="YOUR SCORE IS "+score;
+	  window.addEventListener("keydown",function(event) {
+   // document.getElementById("status").innerHTML="YOUR SCORE IS "+score;
+   var k = event.keyCode;
+	if(k==37) {
+	ctx.clearRect(player.x,player.y,150,150);
+	if(player.x!=20)
+	player.x = player.x-579;
+	}
+	else if(k==39) {
+	ctx.clearRect(player.x,player.y,150,150);
+	if(player.x!=1178)
+	player.x = player.x+579;
+	}
+	});
+  window.addEventListener("load",function() {
+  initCanvas();
+  });
+</script>
+<h1 id="status"></h1>
+</body>
+</html>
